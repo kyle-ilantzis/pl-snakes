@@ -27,3 +27,8 @@ export class GameContext {
               public worldSize: draw.WorldSize,
               public ctx: CanvasRenderingContext2D) {}
 }
+
+export interface GameEntity {
+  update(gameCtx: GameContext);
+  draw(gameCtx: GameContext);
+}

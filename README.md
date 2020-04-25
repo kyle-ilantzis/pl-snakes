@@ -14,6 +14,10 @@
 
 ## Progress
 
+April 25 2020 - the snake moves with keyboard inputs and dies if touching the edges
+
+![](./readme-images/progress-2020-04-25-b.gif)
+
 April 25 2020 - the snake moves in a straight line
 
 ![](./readme-images/progress-2020-04-25.gif)

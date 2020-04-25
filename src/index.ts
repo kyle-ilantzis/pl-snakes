@@ -2,11 +2,12 @@ import * as draw from './draw';
 import * as game from './game';
 import * as logger from './logger';
 import { Snake } from './snake';
+import { GameOver } from './gameOver';
 
 var canvas: any,
     ctx: CanvasRenderingContext2D,
     gameCtx: game.GameContext,
-    snake: Snake,
+    gameEntities: Array<game.GameEntity> = [],
     keydowns: Array<KeyboardEvent> = [];
 
 const tick = () => {
@@ -40,14 +41,18 @@ const processInput = () => {
 }
 
 const updateWorld = () => {
-    snake.update(gameCtx);
+    for (const gameEntity of gameEntities) {
+        gameEntity.update(gameCtx);
+    }
 }
 
 const drawWorld = () => {
     // clear the world
-    draw.drawSquare(ctx, "black", 0, 0, gameCtx.worldSize.width, gameCtx.worldSize.height);
+    draw.drawSquare(gameCtx, "black", 0, 0, gameCtx.worldSize.width, gameCtx.worldSize.height);
 
-    snake.draw(ctx);
+    for (const gameEntity of gameEntities) {
+        gameEntity.draw(gameCtx);
+    }
 }
 
 const gameLoop = () => {
@@ -68,7 +73,10 @@ window.onload = () => {
     
     const worldSize = draw.worldSize(canvas);
 
-    snake = new Snake(0, 0, worldSize);
+    const snake = new Snake(worldSize);
+    const gameOver = new GameOver(snake);
+
+    gameEntities = [snake, gameOver];
     
     gameCtx = new game.GameContext(new game.GameInputs(),
                                    Date.now(),
