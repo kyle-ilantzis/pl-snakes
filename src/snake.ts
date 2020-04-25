@@ -1,4 +1,5 @@
 import * as draw from './draw';
+import * as game from './game';
 
 export class Snake {
   ellapsedMillisSum: number
@@ -9,8 +10,8 @@ export class Snake {
     this.tickRateMillis = 700;
   }
 
-  update(ellapsedMillis: number) {
-      this.ellapsedMillisSum += ellapsedMillis;
+  update(gameCtx: game.GameContext) {
+      this.ellapsedMillisSum += gameCtx.ellapsedMillis;
 
       if (this.ellapsedMillisSum < this.tickRateMillis) {
         return;
