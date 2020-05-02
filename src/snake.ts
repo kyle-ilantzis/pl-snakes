@@ -73,23 +73,13 @@ export class Snake implements game.GameEntity {
       }
 
       // check if dead because out of bounds
-      if (this.point.x < 0) {
-        this.state = SnakeState.dead;
-        this.point.x = 0;
+      this.markDeadIfOutOfBounds();
+      if (this.isDead()) {
+        return;
       }
-      if (this.point.x >= this.worldSize.width) {
-          this.state = SnakeState.dead;
-          this.point.x = this.worldSize.width - 1;
-      }
-      if (this.point.y < 0) {
-        this.state = SnakeState.dead;
-        this.point.y = 0;
-      }
-      if (this.point.y >= this.worldSize.height) {
-          this.state = SnakeState.dead;
-          this.point.y = this.worldSize.height - 1;
-      }
-      if (this.state == SnakeState.dead) {
+
+      this.markDeadIfEatSelf();
+      if (this.isDead()) {
         return;
       }
 
@@ -105,5 +95,38 @@ export class Snake implements game.GameEntity {
       for (const part of this.body) {
         draw.drawPixel(gameCtx, "green", part.x, part.y);
       }
+  }
+
+  private markDeadIfOutOfBounds() {
+    if (this.point.x < 0) {
+      this.state = SnakeState.dead;
+      this.point.x = 0;
+    }
+    if (this.point.x >= this.worldSize.width) {
+        this.state = SnakeState.dead;
+        this.point.x = this.worldSize.width - 1;
+    }
+    if (this.point.y < 0) {
+      this.state = SnakeState.dead;
+      this.point.y = 0;
+    }
+    if (this.point.y >= this.worldSize.height) {
+        this.state = SnakeState.dead;
+        this.point.y = this.worldSize.height - 1;
+    }
+  }
+
+  private markDeadIfEatSelf() {
+    for (let i = 0; i < this.body.length; i++) {
+      const part = this.body[i];
+      if (part.x == this.point.x && part.y == this.point.y) {
+        this.state = SnakeState.dead;
+        break;
+      }
+    }
+  }
+
+  private isDead(): boolean {
+    return this.state == SnakeState.dead;
   }
 }
