@@ -36,7 +36,8 @@ export class Snake implements game.GameEntity {
   }
 
   occupies(point: draw.Point): boolean {
-    return this.point.x == point.x && this.point.y == point.y;
+    const pointOccupies = this.point.x == point.x && this.point.y == point.y;
+    return pointOccupies || this.bodyOccupies(point);
   }
 
   update(gameCtx: game.GameContext) {
@@ -78,6 +79,16 @@ export class Snake implements game.GameEntity {
       for (const part of this.body) {
         draw.drawPixel(gameCtx, "green", part.x, part.y);
       }
+  }
+
+  private bodyOccupies(point: draw.Point): boolean {
+    for (let i = 0; i < this.body.length; i++) {
+      const part = this.body[i];
+      if (part.x == point.x && part.y == point.y) {
+        return true;
+      }
+    }
+    return false;
   }
   
   private processInputDirection(gameCtx: game.GameContext) {
@@ -143,12 +154,8 @@ export class Snake implements game.GameEntity {
   }
 
   private markDeadIfEatSelf() {
-    for (let i = 0; i < this.body.length; i++) {
-      const part = this.body[i];
-      if (part.x == this.point.x && part.y == this.point.y) {
-        this.state = SnakeState.dead;
-        break;
-      }
+    if (this.bodyOccupies(this.point)) {
+      this.state = SnakeState.dead;
     }
   }
 
