@@ -14,6 +14,10 @@
 
 ## Progress
 
+May 2 2020 - snake grows when eating a cherry
+
+![](./readme-images/progress-2020-05-02-b.gif)
+
 May 2 2020 - cherries spawn and the snake can eat them
 
 ![](./readme-images/progress-2020-05-02.gif)

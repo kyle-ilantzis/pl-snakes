@@ -10,24 +10,27 @@ export class Snake implements game.GameEntity {
   public cherryManager: CherryManager;
 
   public state: SnakeState;
-  public x: number; 
-  public y: number;
+  public point: draw.Point;
   
   direction: { x: number, y: number };
   ellapsedMillisSum: number;
   tickRateMillis: number;
 
+  public body: Array<draw.Point> = [];
+
   constructor(public worldSize: draw.WorldSize) {
     this.state = SnakeState.alive;
-    this.x = Math.round( worldSize.width / 2 );
-    this.y = Math.round( worldSize.height / 2 );
+    this.point = {
+      x: Math.round( worldSize.width / 2 ),
+      y: Math.round( worldSize.height / 2 )
+    }
     this.direction = { x: 0, y: 1 };
     this.ellapsedMillisSum = 0;
-    this.tickRateMillis = 500;
+    this.tickRateMillis = 250;
   }
 
   occupies(point: draw.Point): boolean {
-    return this.x == point.x && this.y == point.y;
+    return this.point.x == point.x && this.point.y == point.y;
   }
 
   update(gameCtx: game.GameContext) {
@@ -52,37 +55,55 @@ export class Snake implements game.GameEntity {
       this.ellapsedMillisSum -= this.tickRateMillis;
 
       // apply the direction
-      this.x += this.direction.x;
-      this.y += this.direction.y;
+      let previousPoint = { x: this.point.x, y: this.point.y };
+
+      // to the head
+      this.point.x += this.direction.x;
+      this.point.y += this.direction.y;
+
+      // to the rest of the body
+      for (let i = 0; i < this.body.length; i++) {
+        const part = this.body[i];
+        const partX = part.x;
+        const partY = part.y;
+        part.x = previousPoint.x;
+        part.y = previousPoint.y;
+        previousPoint.x = partX;
+        previousPoint.y = partY;
+      }
 
       // check if dead because out of bounds
-      if (this.x < 0) {
+      if (this.point.x < 0) {
         this.state = SnakeState.dead;
-        this.x = 0;
+        this.point.x = 0;
       }
-      if (this.x >= this.worldSize.width) {
+      if (this.point.x >= this.worldSize.width) {
           this.state = SnakeState.dead;
-          this.x = this.worldSize.width - 1;
+          this.point.x = this.worldSize.width - 1;
       }
-      if (this.y < 0) {
+      if (this.point.y < 0) {
         this.state = SnakeState.dead;
-        this.y = 0;
+        this.point.y = 0;
       }
-      if (this.y >= this.worldSize.height) {
+      if (this.point.y >= this.worldSize.height) {
           this.state = SnakeState.dead;
-          this.y = this.worldSize.height - 1;
+          this.point.y = this.worldSize.height - 1;
       }
       if (this.state == SnakeState.dead) {
         return;
       }
 
       // eat cherry if on it
-      if (this.cherryManager?.cherry?.point?.x == this.x && this.cherryManager?.cherry?.point?.y == this.y) {
+      if (this.cherryManager?.cherry?.point?.x == this.point.x && this.cherryManager?.cherry?.point?.y == this.point.y) {
         this.cherryManager?.cherry?.markEaten();
+        this.body.push(previousPoint);
       }
   }
 
   draw(gameCtx: game.GameContext) {
-      draw.drawPixel(gameCtx, "green", this.x, this.y);
+      draw.drawPixel(gameCtx, "green", this.point.x, this.point.y);
+      for (const part of this.body) {
+        draw.drawPixel(gameCtx, "green", part.x, part.y);
+      }
   }
 }
