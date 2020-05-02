@@ -1,5 +1,6 @@
 import * as draw from './draw';
 import * as game from './game';
+import * as logger from './logger';
 import { SnakeState, Snake } from './snake';
 
 export class CherryManager implements game.GameEntity {
@@ -28,30 +29,17 @@ export class CherryManager implements game.GameEntity {
   }
 
   private spawnCherry(gameCtx: game.GameContext) {
-    const spot = this.findAvailableCherrySpot(gameCtx);
-    if (!spot) { 
+    const x = Math.round( gameCtx.worldSize.width * Math.random() )
+    const y = Math.round( gameCtx.worldSize.height * Math.random() )
+
+    const point = {x, y}
+
+    if (this.snake.occupies(point)) {
+      logger.verbose('CherryManager.spawnCherry failed');
       return;
     }
 
-    this.cherry = new Cherry(spot);
-  }
-
-  private findAvailableCherrySpot(gameCtx: game.GameContext): draw.Point {
-    for(let i = 0; i < 4; i++) {
-      
-      const x = Math.round( gameCtx.worldSize.width * Math.random() )
-      const y = Math.round( gameCtx.worldSize.height * Math.random() )
-      
-      const point = {x, y}
-      
-      if (this.snake.occupies(point)) {
-        continue;
-      }
-
-      return point;
-    }
-
-    return null;
+    this.cherry = new Cherry(point);
   }
 }
 

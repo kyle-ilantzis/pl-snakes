@@ -44,8 +44,6 @@ const updateWorld = () => {
     for (const gameEntity of gameCtx.entities) {
         gameEntity.update(gameCtx);
     }
-
-
 }
 
 const drawWorld = () => {
