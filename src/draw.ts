@@ -2,6 +2,11 @@ import { GameContext } from "./game";
 
 export const GAME_WORLD_PIXEL = 10;
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
 export interface WorldSize { 
   width: number;
   height: number;

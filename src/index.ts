@@ -3,11 +3,11 @@ import * as game from './game';
 import * as logger from './logger';
 import { Snake } from './snake';
 import { GameOver } from './gameOver';
+import { CherryManager } from './cherries';
 
 var canvas: any,
     ctx: CanvasRenderingContext2D,
     gameCtx: game.GameContext,
-    gameEntities: Array<game.GameEntity> = [],
     keydowns: Array<KeyboardEvent> = [];
 
 const tick = () => {
@@ -41,16 +41,18 @@ const processInput = () => {
 }
 
 const updateWorld = () => {
-    for (const gameEntity of gameEntities) {
+    for (const gameEntity of gameCtx.entities) {
         gameEntity.update(gameCtx);
     }
+
+
 }
 
 const drawWorld = () => {
     // clear the world
     draw.drawSquare(gameCtx, "black", 0, 0, gameCtx.worldSize.width, gameCtx.worldSize.height);
 
-    for (const gameEntity of gameEntities) {
+    for (const gameEntity of gameCtx.entities) {
         gameEntity.draw(gameCtx);
     }
 }
@@ -74,14 +76,16 @@ window.onload = () => {
     const worldSize = draw.worldSize(canvas);
 
     const snake = new Snake(worldSize);
+    const cherryManager = new CherryManager(snake);
     const gameOver = new GameOver(snake);
 
-    gameEntities = [snake, gameOver];
+    snake.cherryManager = cherryManager;
     
     gameCtx = new game.GameContext(new game.GameInputs(),
                                    Date.now(),
                                    0,
                                    worldSize,
-                                   ctx);
+                                   ctx,
+                                   [snake, cherryManager, gameOver]);
     gameLoop();
 }

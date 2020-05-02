@@ -25,7 +25,8 @@ export class GameContext {
               public gameNowMillis: number,
               public ellapsedMillis: number,
               public worldSize: draw.WorldSize,
-              public ctx: CanvasRenderingContext2D) {}
+              public ctx: CanvasRenderingContext2D,
+              public entities: Array<GameEntity>) {}
 }
 
 export interface GameEntity {

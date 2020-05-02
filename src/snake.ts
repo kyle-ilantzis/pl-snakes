@@ -1,11 +1,14 @@
 import * as draw from './draw';
 import * as game from './game';
+import { CherryManager } from './cherries';
 
 export enum SnakeState {
   alive,
   dead
 }
 export class Snake implements game.GameEntity {
+  public cherryManager: CherryManager;
+
   public state: SnakeState;
   public x: number; 
   public y: number;
@@ -20,7 +23,11 @@ export class Snake implements game.GameEntity {
     this.y = Math.round( worldSize.height / 2 );
     this.direction = { x: 0, y: 1 };
     this.ellapsedMillisSum = 0;
-    this.tickRateMillis = 700;
+    this.tickRateMillis = 500;
+  }
+
+  occupies(point: draw.Point): boolean {
+    return this.x == point.x && this.y == point.y;
   }
 
   update(gameCtx: game.GameContext) {
@@ -64,6 +71,14 @@ export class Snake implements game.GameEntity {
       if (this.y >= this.worldSize.height) {
           this.state = SnakeState.dead;
           this.y = this.worldSize.height - 1;
+      }
+      if (this.state == SnakeState.dead) {
+        return;
+      }
+
+      // eat cherry if on it
+      if (this.cherryManager?.cherry?.point?.x == this.x && this.cherryManager?.cherry?.point?.y == this.y) {
+        this.cherryManager?.cherry?.markEaten();
       }
   }
 
