@@ -11,12 +11,14 @@ export class Snake implements game.GameEntity {
 
   public state: SnakeState;
   public point: draw.Point;
-  
-  direction: { x: number, y: number };
+
+  inputDirection: draw.Point;
   ellapsedMillisSum: number;
   tickRateMillis: number;
 
-  public body: Array<draw.Point> = [];
+  direction: draw.Point;
+  previousPoint: draw.Point;
+  body: Array<draw.Point>;
 
   constructor(public worldSize: draw.WorldSize) {
     this.state = SnakeState.alive;
@@ -24,9 +26,13 @@ export class Snake implements game.GameEntity {
       x: Math.round( worldSize.width / 2 ),
       y: Math.round( worldSize.height / 2 )
     }
-    this.direction = { x: 0, y: 1 };
+
     this.ellapsedMillisSum = 0;
     this.tickRateMillis = 250;
+
+    this.direction = { x: 0, y: 1 };
+    this.previousPoint = this.point;
+    this.body = [];
   }
 
   occupies(point: draw.Point): boolean {
@@ -38,14 +44,7 @@ export class Snake implements game.GameEntity {
         return;
       }
 
-      // update the direction
-      if (gameCtx.inputs.many()) {
-        return;
-      }
-      if (gameCtx.inputs.up) this.direction = { x: 0, y: -1 };
-      if (gameCtx.inputs.down) this.direction = { x: 0, y: 1 };
-      if (gameCtx.inputs.left) this.direction = { x: -1, y: 0 };
-      if (gameCtx.inputs.right) this.direction = { x: 1, y: 0 };
+      this.processInputDirection(gameCtx);
 
       // if ellapsed time span is under tick, skip update
       this.ellapsedMillisSum += gameCtx.ellapsedMillis;
@@ -54,25 +53,9 @@ export class Snake implements game.GameEntity {
       }
       this.ellapsedMillisSum -= this.tickRateMillis;
 
-      // apply the direction
-      let previousPoint = { x: this.point.x, y: this.point.y };
+      this.updateDirectionIfNecessary();
+      this.applyDirection();
 
-      // to the head
-      this.point.x += this.direction.x;
-      this.point.y += this.direction.y;
-
-      // to the rest of the body
-      for (let i = 0; i < this.body.length; i++) {
-        const part = this.body[i];
-        const partX = part.x;
-        const partY = part.y;
-        part.x = previousPoint.x;
-        part.y = previousPoint.y;
-        previousPoint.x = partX;
-        previousPoint.y = partY;
-      }
-
-      // check if dead because out of bounds
       this.markDeadIfOutOfBounds();
       if (this.isDead()) {
         return;
@@ -86,7 +69,7 @@ export class Snake implements game.GameEntity {
       // eat cherry if on it
       if (this.cherryManager?.cherry?.point?.x == this.point.x && this.cherryManager?.cherry?.point?.y == this.point.y) {
         this.cherryManager?.cherry?.markEaten();
-        this.body.push(previousPoint);
+        this.body.push(this.previousPoint);
       }
   }
 
@@ -94,6 +77,49 @@ export class Snake implements game.GameEntity {
       draw.drawPixel(gameCtx, "green", this.point.x, this.point.y);
       for (const part of this.body) {
         draw.drawPixel(gameCtx, "green", part.x, part.y);
+      }
+  }
+  
+  private processInputDirection(gameCtx: game.GameContext) {
+      if (!gameCtx.inputs.many()) {
+        if (gameCtx.inputs.up) this.inputDirection = { x: 0, y: -1 };
+        if (gameCtx.inputs.down) this.inputDirection = { x: 0, y: 1 };
+        if (gameCtx.inputs.left) this.inputDirection = { x: -1, y: 0 };
+        if (gameCtx.inputs.right) this.inputDirection = { x: 1, y: 0 };
+      }
+  }
+
+  private updateDirectionIfNecessary() {
+    if (!this.inputDirection) {
+      return;
+    }
+
+    if (this.inputDirection.x == 1 && this.direction.x == -1 ||
+      this.inputDirection.x == -1 && this.direction.x == 1 ||
+      this.inputDirection.y == 1 && this.direction.y == -1 ||
+      this.inputDirection.y == -1 && this.direction.y == 1) {
+        return;
+    }
+
+    this.direction = this.inputDirection;
+  }
+
+  private applyDirection() {
+      this.previousPoint = { x: this.point.x, y: this.point.y };
+
+      // to the head
+      this.point.x += this.direction.x;
+      this.point.y += this.direction.y;
+
+      // to the rest of the body
+      for (let i = 0; i < this.body.length; i++) {
+        const part = this.body[i];
+        const partX = part.x;
+        const partY = part.y;
+        part.x = this.previousPoint.x;
+        part.y = this.previousPoint.y;
+        this.previousPoint.x = partX;
+        this.previousPoint.y = partY;
       }
   }
 
