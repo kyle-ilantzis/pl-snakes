@@ -29,8 +29,8 @@ export class CherryManager implements game.GameEntity {
   }
 
   private spawnCherry(gameCtx: game.GameContext) {
-    const x = Math.round( gameCtx.worldSize.width * Math.random() )
-    const y = Math.round( gameCtx.worldSize.height * Math.random() )
+    const x = Math.round( (gameCtx.worldSize.width - 1) * Math.random() )
+    const y = Math.round( (gameCtx.worldSize.height - 1) * Math.random() )
 
     const point = {x, y}
 
